@@ -1,0 +1,42 @@
+using CrashCourseWeb.Behaviours;
+using CrashCourseWeb.Data;
+using CrashCourseWeb.Validations;
+using FluentValidation;
+using MediatR;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.EntityFrameworkCore;
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+//Validation Pipeline
+builder.Services.AddValidatorsFromAssembly(typeof(StudentValidator).Assembly);
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
+
+builder.Services.AddDbContext<ApplicationContext>(options =>
+options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), 
+b => b.MigrationsAssembly(typeof(ApplicationContext).Assembly.FullName)));
+builder.Services.AddControllers();
+string swaggerName = "Gozie and Habzone Crash Course";
+//Adding Swagger Service
+builder.Services.AddSwaggerGen(options => options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = swaggerName, Version = "v1" }));
+// Add services to the container.
+builder.Services.AddRazorPages();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error");
+}
+app.UseSwagger();
+app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", swaggerName));
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseAuthorization();
+
+app.MapRazorPages();
+app.MapControllers();
+app.Run();
