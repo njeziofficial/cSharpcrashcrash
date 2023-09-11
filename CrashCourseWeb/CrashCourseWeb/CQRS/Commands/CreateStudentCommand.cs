@@ -20,9 +20,9 @@ namespace CrashCourseWeb.CQRS.Commands
 
         public async Task<Student> Handle(CreateStudentCommand command, CancellationToken cancellationToken)
         {
-            await _context.Students.AddAsync(command);
+            var response = (await _context.Students.AddAsync(command)).Entity;
             await _context.SaveChangesAsync();
-            return command;
+            return response;
         }
     }
 }

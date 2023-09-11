@@ -41,6 +41,8 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapRazorPages();
+
+//Custom Middleware
 app.ExtendBuilder();
 app.MapControllers();
 app.Run();
