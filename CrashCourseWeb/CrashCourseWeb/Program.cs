@@ -1,17 +1,20 @@
 using CrashCourseWeb.Behaviours;
+using CrashCourseWeb.CQRS.Commands;
 using CrashCourseWeb.Data;
+using CrashCourseWeb.Extensions;
 using CrashCourseWeb.Validations;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
 //Validation Pipeline
 builder.Services.AddValidatorsFromAssembly(typeof(StudentValidator).Assembly);
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
-
+builder.Services.AddMediatR(x => x.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()));
 builder.Services.AddDbContext<ApplicationContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), 
 b => b.MigrationsAssembly(typeof(ApplicationContext).Assembly.FullName)));
@@ -38,5 +41,6 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapRazorPages();
+app.ExtendBuilder();
 app.MapControllers();
 app.Run();
